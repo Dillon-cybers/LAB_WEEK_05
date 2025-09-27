@@ -51,21 +51,27 @@ class MainActivity : AppCompatActivity() {
             override fun onFailure(call: Call<List<ImageData>>, t: Throwable) {
                 Log.e(MAIN_ACTIVITY, "Failed to get response", t)
             }
-            override fun onResponse(call: Call<List<ImageData>>, response:
-            Response<List<ImageData>>) {
+
+            override fun onResponse(
+                call: Call<List<ImageData>>,
+                response: Response<List<ImageData>>
+            ) {
                 if(response.isSuccessful){
                     val image = response.body()
-                    val firstImage = image?.firstOrNull()?.imageUrl.orEmpty()
-                    if (firstImage.isNotBlank()) {
-                        imageLoader.loadImage(firstImage, imageResultView)
-                    } else {
-                        Log.d(MAIN_ACTIVITY, "Missing image URL")
-                    }
-                    apiResponseView.text = getString(R.string.image_placeholder,
-                        firstImage)
+                    val firstImage = image?.firstOrNull()
 
+                    val breedName = if (!firstImage?.breeds.isNullOrEmpty()) {
+                        firstImage?.breeds?.firstOrNull()?.name ?: "Unknown"
+                    } else {
+                        "Unknown"
+                    }
+                    val imageUrl = firstImage?.imageUrl.orEmpty()
+                    if (imageUrl.isNotBlank()) {
+                        imageLoader.loadImage(imageUrl, imageResultView)
+                    }
+                    apiResponseView.text = getString(R.string.breed_placeholder, breedName)
                 }
-                else{
+                else {
                     Log.e(MAIN_ACTIVITY, "Failed to get response\n" +
                             response.errorBody()?.string().orEmpty()
                     )
@@ -73,6 +79,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
+
     companion object{
         const val MAIN_ACTIVITY = "MAIN_ACTIVITY"
     }
